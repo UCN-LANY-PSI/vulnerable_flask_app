@@ -62,17 +62,17 @@ Arbejdsgang
    CREATE INDEX idx_users_username ON users(username);
    ```
    
-7.	**Kør scriptet**
+5. **Kør scriptet**
 
    Første gang (eller når du vil starte forfra):
 
-```bash
-python setup_db_student.py --fresh
-```
+   ```bash
+   python setup_db_student.py --fresh
+   ```
 
    Uden --fresh overskrives ikke automatisk en eksisterende test.db.
 
-8.	**Forventet output**
+6. **Forventet output**
 
    Hvis alt er korrekt, ser du:
    - Sanity check: OK
