@@ -16,8 +16,8 @@
 -	Brug ikke teknikkerne mod systemer, du ikke har rettighed til at teste.
 
 ## Oversigt over dele
-A.	Opret testdatabase og data
-B.	Kør en bevidst sårbar mini-webapp (Flask)
-C.	Udfør SQL-injektion og observer effekten
-D.	Refaktorér til parameteriserede forespørgsler
-E.	Sammenlign før/efter og skriv kort konklusion
+A.	Opret testdatabase og data  
+B.	Kør en bevidst sårbar mini-webapp (Flask)  
+C.	Udfør SQL-injektion og observer effekten  
+D.	Refaktorér til parameteriserede forespørgsler  
+E.	Sammenlign før/efter og skriv kort konklusion  
