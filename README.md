@@ -84,29 +84,37 @@ Arbejdsgang
    - For få rækker / ingen admin → tilføj i USERS_ROWS.
    - Dublerede usernames → ret værdierne i USERS_ROWS.
 
-9.	Verificér databasen (valgfrit, men anbefalet)
+7. **Verificér databasen (valgfrit, men anbefalet)**
 
-o	Via SQLite-CLI:
-sqlite3 test.db
-.tables
-.schema users
-SELECT COUNT(*) FROM users;
-SELECT * FROM users LIMIT 5;
-.quit
-o	Tjek at tabellen users findes, og at der er mindst 5 rækker.
+   Via SQLite-CLI:
 
-10.	Brug databasen i øvelsen
+   ```bash
+   sqlite3 test.db
+   .tables
+   .schema users
+   SELECT COUNT(*) FROM users;
+   SELECT * FROM users LIMIT 5;
+   .quit
+   ```
+   
+   Tjek at tabellen users findes, og at der er mindst 5 rækker.
 
-o	Når test.db er klar, kan du køre:
-python app_vuln.py
-o	... og senere ...
-python app_secure.py
-Acceptkriterier
-•	test.db oprettes i projektmappen.
-•	Tabellens schema er: users(id, username, email, role) med krav som angivet.
-•	Mindst 5 rækker i users, inkl. mindst én admin.
-•	Sanity check: OK og ingen dubletter i username.
-•	(Valgfrit) Indeks på username oprettet uden fejl.
+8. **Brug databasen i øvelsen**
+
+   Når test.db er klar, kan du køre:
+
+   python app_vuln.py
+
+   ... og senere ...
+
+   python app_secure.py
+
+   **Acceptkriterier**
+   - test.db oprettes i projektmappen.
+   - Tabellens schema er: users(id, username, email, role) med krav som angivet.
+   - Mindst 5 rækker i users, inkl. mindst én admin.
+   - Sanity check: OK og ingen dubletter i username.
+   - (Valgfrit) Indeks på username oprettet uden fejl.
 
 ---
 
