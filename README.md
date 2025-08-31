@@ -109,7 +109,7 @@ Arbejdsgang
 
    python app_secure.py
 
-   **Acceptkriterier**
+#### Acceptkriterier
    - test.db oprettes i projektmappen.
    - Tabellens schema er: users(id, username, email, role) med krav som angivet.
    - Mindst 5 rækker i users, inkl. mindst én admin.
