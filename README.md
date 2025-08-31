@@ -58,7 +58,7 @@ Arbejdsgang
    
    Opret eventuelt et indeks på username, fx:
 
-   ´´´
+   ´´´sql
    CREATE INDEX idx_users_username ON users(username);
    ´´´
    
