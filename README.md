@@ -22,6 +22,8 @@
 1.	Refaktorér til parameteriserede forespørgsler  
 1.	Sammenlign før/efter og skriv kort konklusion  
 
+--- 
+
 ### 1. Opret testdatabase og data
 
 **Formål**  
@@ -118,83 +120,153 @@ Arbejdsgang
 
 ---
 
-B.	Sårbar mini-webapp med Flask
+### 2. Sårbar mini-webapp med Flask
+
 Kopier filen app_vuln.py (med bevidst sårbar forespørgsel):
+
 Kør:
+
+```bash
 python app_vuln.py
+```
+
 Åbn i browser: http://127.0.0.1:5000/
+
 Test normal forespørgsel: skriv alice i feltet.
-C.	Udfør SQL-injektion
-1.	I feltet, skriv: x' OR '1'='1
-Tryk Søg.
-Forvent: Appen returnerer mange rækker (alle brugere), selvom der blev søgt på “x…”.
-Forklaring: WHERE username = 'x' OR '1'='1' gør betingelsen altid er sand.
-2.	Prøv også en “lukning” og kommentering (afhænger af DB-dialekt): ' OR 1=1 –
-Hvis du bruger URL’en direkte, så husk URL-encoding af mellemrum mm., men formularen ovenfor gør det nemt.
-Observationer at notere:
-•	Hvad returneres ved almindelig søgning vs. injektion?
-•	Hvilken SQL blev logget i terminalen?
-D.	Forebyggelse: parameteriserede forespørgsler
-Målet
+
+---
+
+### 3. Udfør SQL-injektion
+
+1. I feltet, skriv: *x' OR '1'='1* 
+
+   Tryk Søg.
+
+   **Forvent**: Appen returnerer mange rækker (alle brugere), selvom der blev søgt på "x…".
+   
+   **Forklaring**: *WHERE username = 'x' OR '1'='1'* gør betingelsen altid er sand.
+   
+2. Prøv også en "lukning" og kommentering (afhænger af DB-dialekt): *' OR 1=1 –*
+
+   Hvis du bruger URL’en direkte, så husk URL-encoding af mellemrum mm., men formularen ovenfor gør det nemt.
+
+   Observationer at notere:
+   - Hvad returneres ved almindelig søgning vs. injektion?
+   - Hvilken SQL blev logget i terminalen?
+
+---
+
+### 4. Forebyggelse: parameteriserede forespørgsler
+
+**Målet**
+
 Gør den sårbare app sikker ved at kopiere koden og erstatte strengsammenkædning med parameteriserede forespørgsler + enkel inputkontrol.
-Arbejdsgang
-1.	Lav en kopi af den usikre fil app_vuln.py 
-cp app_vuln.py app_secure.py
-Åbn app_secure.py. Behold samme routes (/ og /search), men ret teksten i HTML-titlen til fx “(sikker)”.
-2.	Find den sårbare del
+
+**Arbejdsgang**
+
+1. Lav en kopi af den usikre fil app_vuln.py 
+
+   ```bash
+   cp app_vuln.py app_secure.py
+   ```
+   
+   Åbn app_secure.py. Behold samme routes (/ og /search), men ret teksten i HTML-titlen til fx “(sikker)”.
+   
+2. Find den sårbare del
+
 I handleren for /search ligger der typisk:
+
+```python
 name = request.args.get("name", "")
 query = f"SELECT id, username, email, role FROM users WHERE username = '{name}'"
 cur.execute(query)
+```
+
 Det er denne del, der skal refaktoreres.
-3.	Tilføj enkel inputkontrol
+
+3. Tilføj enkel inputkontrol
+
 Lige efter du henter name:
+
+```python
 name = request.args.get("name", "").strip()
 if len(name) > 50:
     return jsonify({"error": "Input for langt"}), 400
+```
+
 (Begrænsninger hjælper robustheden, men erstatter ikke parameterisering.)
-4.	Erstat strengsammenkædning med parametre
+
+4. Erstat strengsammenkædning med parametre
+
 Brug SQLite-placeholders (?) og send værdier som anden parameter til execute:
+
+```python
 query = "SELECT id, username, email, role FROM users WHERE username = ?"
 cur.execute(query, (name,))
 rows = cur.fetchall()
+```
+
 Tip: brug gerne context manager for at sikre lukning:
+
+```python
 with sqlite3.connect(DB_PATH) as conn:
    cur = conn.cursor()
    cur.execute(query, (name,))
    rows = cur.fetchall()
+```
+
 5.	(Valgfrit) Sikkert delvist match (LIKE)
+
 Hvis du vil understøtte søgning på dele af navnet:
+
+```python
 query = "SELECT id, username, email, role FROM users WHERE username LIKE '%' || ? || '%'"
 cur.execute(query, (name,))
+```
+
 Her er stadig parameterisering – % tilføjes i SQL via streng-konkatenering, men inputtet er bundet som parameter.
+
 6.	Fejlbeskeder og logging
+
 Pak DB-kald ind i try/except, returnér generiske fejl til klienten, og log detaljer i serverkonsollen (ingen rå SQL-fejl til bruger):
+
+```python
 try:
     # DB-kald
 except Exception as e:
     print("Intern fejl:", e)
     return jsonify({"error": "Internal server error"}), 500
-7.	Retest med samme input som før
-o	Normal søgning: alice → forvent præcist match.
-o	Injektion: x' OR '1'='1 → forvent ingen massivt datalæk (typisk tomt resultat).
-o	Notér forskel i adfærd mellem app_vuln.py og app_secure.py.
-8.	Dokumentér kort (5–8 linjer)
-o	Hvad ændrede I i koden?
-o	Hvordan ændrede resultatet sig (før/efter)?
-o	Hvilke CIA-principper blev bedre beskyttet?
-o	Hvad ville næste lag være (validering, least privilege, sikre fejl, logging)?
-Acceptkriterier
-•	Koden i app_secure.py bruger parameteriserede forespørgsler i alle DB-kald.
-•	Enkel inputkontrol (trim, længdecheck) er tilføjet.
-•	Ingen rå DB-fejl sendes til bruger.
-•	Samme injektionsinput giver ikke datalæk i app_secure.py.
-•	Kort sammenligning mellem sårbar og sikker version er skrevet.
-E.	Sammenlign før/efter og konkludér
+```
+
+7. Retest med samme input som før
+
+   - Normal søgning: alice → forvent præcist match.
+   - Injektion: x' OR '1'='1 → forvent ingen massivt datalæk (typisk tomt resultat).
+   - Notér forskel i adfærd mellem app_vuln.py og app_secure.py.
+
+8. Dokumentér kort (5–8 linjer)
+
+   - Hvad ændrede I i koden?
+   - Hvordan ændrede resultatet sig (før/efter)?
+   - Hvilke CIA-principper blev bedre beskyttet?
+   - Hvad ville næste lag være (validering, least privilege, sikre fejl, logging)?
+   
+#### Acceptkriterier
+- Koden i app_secure.py bruger parameteriserede forespørgsler i alle DB-kald.
+- Enkel inputkontrol (trim, længdecheck) er tilføjet.
+- Ingen rå DB-fejl sendes til bruger.
+- Samme injektionsinput giver ikke datalæk i app_secure.py.
+- Kort sammenligning mellem sårbar og sikker version er skrevet.
+
+---
+
+### 5.	Sammenlign før/efter og konkludér
+
 Skriv en kort sammenligning (5–8 linjer):
-•	Hvad skete i den sårbare version ved injektion?
-•	Hvad skete i den sikre version?
-•	Hvilke CIA-principper berøres af den sårbare adfærd?
-•	Hvilke kodeændringer gjorde forskellen (parameterisering, evt. længdecheck)?
-•	Hvad ville være næste lag i defense-in-depth (fx least privilege, generiske fejlbeskeder, logging/monitorering)?
+
+- Hvad skete i den sårbare version ved injektion?
+- Hvad skete i den sikre version?
+- Hvilke CIA-principper berøres af den sårbare adfærd?
+- Hvilke kodeændringer gjorde forskellen (parameterisering, evt. længdecheck)?
+- Hvad ville være næste lag i defense-in-depth (fx least privilege, generiske fejlbeskeder, logging/monitorering)?
 
