@@ -29,11 +29,11 @@
 At oprette en lokal SQLite-database (test.db) med tabellen users og realistiske rækker, så den kan bruges af app_vuln.py og app_secure.py.
 Arbejdsgang
 
-1. Åbn filen setup_db_student.py
+1. **Åbn filen setup_db_student.py**
    
    Læs kommentarfeltet øverst og gennemgå TODO 1–3.
   	
-2. Udfyld TODO 1 – USERS_SCHEMA
+2. **Udfyld TODO 1 – USERS_SCHEMA**
 
    Opret tabellen users med præcis disse kolonner og krav:
    - id = INTEGER PRIMARY KEY AUTOINCREMENT
@@ -45,7 +45,7 @@ Arbejdsgang
 
    Kolonnenavne og typer skal matche ovenstående, ellers fejler sanity check.
 
-3. Udfyld TODO 2 – USERS_ROWS
+3. **Udfyld TODO 2 – USERS_ROWS**
 
    Indsæt mindst 5 rækker som 3-tupler: (username, email, role).
 
@@ -54,7 +54,7 @@ Arbejdsgang
    - Unikke username-værdier (ingen dubletter).
    - Brug realistiske værdier (fx alice, bob, …).
 
-4. (Valgfrit) Udfyld TODO 3 – USERS_INDEX_SQL
+4. **(Valgfrit) Udfyld TODO 3 – USERS_INDEX_SQL**
    
    Opret eventuelt et indeks på username, fx:
 
@@ -62,22 +62,27 @@ Arbejdsgang
    CREATE INDEX idx_users_username ON users(username);
    ```
    
-7.	Kør scriptet
+7.	**Kør scriptet**
 
-o	Første gang (eller når du vil starte forfra):
+   Første gang (eller når du vil starte forfra):
+
+```bash
 python setup_db_student.py --fresh
-o	Uden --fresh overskrives ikke automatisk en eksisterende test.db.
+```
 
-8.	Forventet output
+   Uden --fresh overskrives ikke automatisk en eksisterende test.db.
 
-o	Hvis alt er korrekt, ser du:
-	Sanity check: OK
-	OK: test.db klar.
-o	Hvis noget mangler, får du en forklarende fejl (læs den og ret i filen):
-	NotImplementedError → USERS_SCHEMA indeholder stadig TODO-tekst.
-	Manglende kolonner/typer → ret USERS_SCHEMA.
-	For få rækker / ingen admin → tilføj i USERS_ROWS.
-	Dublerede usernames → ret værdierne i USERS_ROWS.
+8.	**Forventet output**
+
+   Hvis alt er korrekt, ser du:
+   - Sanity check: OK
+   - OK: test.db klar.
+
+   Hvis noget mangler, får du en forklarende fejl (læs den og ret i filen):
+   - NotImplementedError → USERS_SCHEMA indeholder stadig TODO-tekst.
+   - Manglende kolonner/typer → ret USERS_SCHEMA.
+   - For få rækker / ingen admin → tilføj i USERS_ROWS.
+   - Dublerede usernames → ret værdierne i USERS_ROWS.
 
 9.	Verificér databasen (valgfrit, men anbefalet)
 
