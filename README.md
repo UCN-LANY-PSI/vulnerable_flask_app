@@ -174,70 +174,70 @@ Gør den sårbare app sikker ved at kopiere koden og erstatte strengsammenkædni
    
 2. Find den sårbare del
 
-I handleren for /search ligger der typisk:
-
-```python
-name = request.args.get("name", "")
-query = f"SELECT id, username, email, role FROM users WHERE username = '{name}'"
-cur.execute(query)
-```
-
-Det er denne del, der skal refaktoreres.
+   I handleren for /search ligger der typisk:
+   
+   ```python
+   name = request.args.get("name", "")
+   query = f"SELECT id, username, email, role FROM users WHERE username = '{name}'"
+   cur.execute(query)
+   ```
+   
+   Det er denne del, der skal refaktoreres.
 
 3. Tilføj enkel inputkontrol
 
-Lige efter du henter name:
-
-```python
-name = request.args.get("name", "").strip()
-if len(name) > 50:
-    return jsonify({"error": "Input for langt"}), 400
-```
-
-(Begrænsninger hjælper robustheden, men erstatter ikke parameterisering.)
+   Lige efter du henter name:
+   
+   ```python
+   name = request.args.get("name", "").strip()
+   if len(name) > 50:
+       return jsonify({"error": "Input for langt"}), 400
+   ```
+   
+   (Begrænsninger hjælper robustheden, men erstatter ikke parameterisering.)
 
 4. Erstat strengsammenkædning med parametre
 
-Brug SQLite-placeholders (?) og send værdier som anden parameter til execute:
-
-```python
-query = "SELECT id, username, email, role FROM users WHERE username = ?"
-cur.execute(query, (name,))
-rows = cur.fetchall()
-```
-
-Tip: brug gerne context manager for at sikre lukning:
-
-```python
-with sqlite3.connect(DB_PATH) as conn:
-   cur = conn.cursor()
+   Brug SQLite-placeholders (?) og send værdier som anden parameter til execute:
+   
+   ```python
+   query = "SELECT id, username, email, role FROM users WHERE username = ?"
    cur.execute(query, (name,))
    rows = cur.fetchall()
-```
+   ```
 
-5.	(Valgfrit) Sikkert delvist match (LIKE)
+   Tip: brug gerne context manager for at sikre lukning:
+   
+   ```python
+   with sqlite3.connect(DB_PATH) as conn:
+      cur = conn.cursor()
+      cur.execute(query, (name,))
+      rows = cur.fetchall()
+   ```
 
-Hvis du vil understøtte søgning på dele af navnet:
+5. (Valgfrit) Sikkert delvist match (LIKE)
 
-```python
-query = "SELECT id, username, email, role FROM users WHERE username LIKE '%' || ? || '%'"
-cur.execute(query, (name,))
-```
+   Hvis du vil understøtte søgning på dele af navnet:
+   
+   ```python
+   query = "SELECT id, username, email, role FROM users WHERE username LIKE '%' || ? || '%'"
+   cur.execute(query, (name,))
+   ```
+   
+   Her er stadig parameterisering – % tilføjes i SQL via streng-konkatenering, men inputtet er bundet som parameter.
+   
+6. Fejlbeskeder og logging
 
-Her er stadig parameterisering – % tilføjes i SQL via streng-konkatenering, men inputtet er bundet som parameter.
-
-6.	Fejlbeskeder og logging
-
-Pak DB-kald ind i try/except, returnér generiske fejl til klienten, og log detaljer i serverkonsollen (ingen rå SQL-fejl til bruger):
-
-```python
-try:
-    # DB-kald
-except Exception as e:
-    print("Intern fejl:", e)
-    return jsonify({"error": "Internal server error"}), 500
-```
-
+   Pak DB-kald ind i try/except, returnér generiske fejl til klienten, og log detaljer i serverkonsollen (ingen rå SQL-fejl til bruger):
+   
+   ```python
+   try:
+       # DB-kald
+   except Exception as e:
+       print("Intern fejl:", e)
+       return jsonify({"error": "Internal server error"}), 500
+   ```
+   
 7. Retest med samme input som før
 
    - Normal søgning: alice → forvent præcist match.
@@ -252,6 +252,7 @@ except Exception as e:
    - Hvad ville næste lag være (validering, least privilege, sikre fejl, logging)?
    
 #### Acceptkriterier
+
 - Koden i app_secure.py bruger parameteriserede forespørgsler i alle DB-kald.
 - Enkel inputkontrol (trim, længdecheck) er tilføjet.
 - Ingen rå DB-fejl sendes til bruger.
@@ -260,7 +261,7 @@ except Exception as e:
 
 ---
 
-### 5.	Sammenlign før/efter og konkludér
+### 5. Sammenlign før/efter og konkludér
 
 Skriv en kort sammenligning (5–8 linjer):
 
