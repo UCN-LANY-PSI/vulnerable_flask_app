@@ -58,9 +58,9 @@ Arbejdsgang
    
    Opret eventuelt et indeks på username, fx:
 
-   ´´´sql
+   ```sql
    CREATE INDEX idx_users_username ON users(username);
-   ´´´
+   ```
    
 7.	Kør scriptet
 
